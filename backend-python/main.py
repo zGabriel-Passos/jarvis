@@ -38,7 +38,11 @@ def call_groq(user_text):
         "max_tokens": 500
     }
     response = requests.post(GROQ_URL, headers=headers, json=payload)
+    if response.status_code != 200:
+        raise Exception(f"Groq API erro {response.status_code}: {response.text}")
     data = response.json()
+    if "choices" not in data:
+        raise Exception(f"Sem choices na resposta da Groq: {data}")
     return data["choices"][0]["message"]["content"]
 
 def parse_ai_response(text):
