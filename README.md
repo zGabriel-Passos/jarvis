@@ -1,6 +1,7 @@
 # 🤖 Jarvis — Assistente de Voz com IA
 
 Controle seu computador usando apenas sua voz! Assistente inteligente com IA que entende comandos naturais e executa ações no seu PC.
+> **Stack resumida:** `Python` · `NexyJS` · `Flask` · `Groq (LLaMA 3.3)` · `PyAutoGUI`
 
 ![Jarvis Preview](./assets/preview.png)
 
