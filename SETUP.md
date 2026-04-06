@@ -1,6 +1,8 @@
 # 🤖 Jarvis — Setup
 
-Assistente de voz com IA (Groq) que controla seu PC.
+> ⚠️ **Em construção!** O Jarvis ainda é limitado. Funciona bem para comandos básicos, mas segue em desenvolvimento.
+
+Assistente de voz com IA (Groq + ElevenLabs) que controla seu PC.
 
 ## 🚀 Como Configurar e Usar
 
@@ -18,13 +20,15 @@ cd backend-python
 copy .env.example .env
 ```
 
-Abra o `.env` e cole sua Groq API Key:
+Abra o `.env` e cole suas API Keys:
 
 ```
 GROQ_API_KEY=sua_chave_aqui
+ELEVENLABS_API_KEY=sua_chave_aqui
 ```
 
-Obtenha uma chave grátis em [console.groq.com](https://console.groq.com).
+- Groq API: [console.groq.com](https://console.groq.com)
+- ElevenLabs API: [elevenlabs.io](https://elevenlabs.io) — ative a permissão **Text to Speech** na chave
 
 ### 3. Iniciar Backend Python
 
@@ -61,4 +65,4 @@ Frontend rodará em `http://localhost:3000`
 ## 🔧 Arquitetura
 
 - **Frontend**: Next.js + Web Speech API
-- **Backend**: Flask + Groq AI + pyautogui
+- **Backend**: Flask + Groq AI + ElevenLabs TTS + pyautogui

@@ -1,5 +1,7 @@
 # 🏗️ Estrutura do Projeto Jarvis
 
+> ⚠️ **Em construção!** O Jarvis ainda está em desenvolvimento e é relativamente limitado. Funciona bem para comandos básicos, mas segue evoluindo.
+
 Documentação completa da arquitetura e organização do assistente de voz Jarvis.
 
 ---
@@ -21,8 +23,10 @@ jarvis-simple/
 │   └── 📄 VoiceAssistant.tsx        # Componente do assistente (legado)
 │
 ├── 📁 backend-python/               # API Python Flask
-│   ├── 📄 main.py                   # Servidor Flask + lógica
-│   ├── 📄 voice_commands.json       # Configuração de comandos
+│   ├── 📄 main.py                   # Servidor Flask + Groq AI + ElevenLabs TTS
+│   ├── 📄 system_prompt.md          # Prompt do sistema da IA
+│   ├── 📄 .env                      # API Keys (Groq + ElevenLabs)
+│   ├── 📄 .env.example              # Modelo para copiar
 │   └── 📄 requirements.txt          # Dependências Python
 │
 ├── 📁 public/                       # Arquivos estáticos
@@ -80,10 +84,11 @@ jarvis-simple/
 │              BACKEND (Flask - localhost:5000)                   │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │  main.py                                                 │  │
-│  │  1. Normaliza texto (remove acentos)                     │  │
-│  │  2. Busca comando em voice_commands.json                 │  │
-│  │  3. Executa via pyautogui                                │  │
-│  │  4. Retorna status + speech                              │  │
+│  │  1. Envia texto para Groq AI interpretar                 │  │
+│  │  2. Extrai tools (pyautogui) e speech                    │  │
+│  │  3. Executa ações via pyautogui                          │  │
+│  │  4. ElevenLabs gera áudio a partir do speech             │  │
+│  │  5. Retorna status + speech + audio (base64)             │  │
 │  └────────────────────────┬─────────────────────────────────┘  │
 └────────────────────────────┼────────────────────────────────────┘
                              │
@@ -128,8 +133,7 @@ components/
 **Tecnologias:**
 - React 18 + TypeScript
 - Tailwind CSS v4
-- Web Speech API (nativa do navegador)
-- Speech Synthesis API (voz de resposta)
+- Web Speech API (nativa do navegador) — reconhecimento de voz
 
 ---
 
@@ -138,9 +142,10 @@ components/
 ```
 backend-python/
 ├── main.py
-│   ├── normalize_text(): Remove acentos e pontuação
-│   ├── load_commands(): Carrega voice_commands.json
-│   ├── execute_command(): Executa teclas via pyautogui
+│   ├── call_groq(): Envia texto para Groq AI (Llama 3.3)
+│   ├── parse_ai_response(): Extrai tools e speech do JSON
+│   ├── synthesize_speech(): Gera áudio via ElevenLabs TTS
+│   ├── execute_action(): Executa comandos via pyautogui
 │   └── /execute (POST): Endpoint principal
 │
 ├── voice_commands.json
@@ -154,15 +159,17 @@ backend-python/
 └── requirements.txt
     ├── flask
     ├── flask-cors
-    └── pyautogui
+    ├── pyautogui
+    └── edge-tts (reserva)
 ```
 
 **Fluxo de Execução:**
 1. Recebe `{ "text": "nova aba" }`
-2. Normaliza: `"nova aba"` → `"nova aba"`
-3. Busca no JSON: encontra `["nova aba", "new tab"]`
-4. Executa: `pyautogui.hotkey('ctrl', 't')`
-5. Retorna: `{ "status": "executed", "command": "new_tab", "speech": "Abrindo nova aba" }`
+2. Envia texto para Groq AI (Llama 3.3) interpretar
+3. Extrai `tools` (ações pyautogui) e `speech` (resposta em PT-BR)
+4. Executa ações via pyautogui
+5. ElevenLabs gera áudio a partir do texto de resposta
+6. Retorna: `{ "status": "executed", "speech": "Abrindo nova aba", "audio": "<base64>" }`
 
 ---
 
@@ -413,18 +420,26 @@ Corpo (Parágrafos, Botões):
 flask==3.1.0
 flask-cors==5.0.0
 pyautogui==0.9.54
+python-dotenv
+edge-tts
 ```
+
+### Serviços Cloud
+- **Groq AI** — LLM Llama 3.3 (compreensão de linguagem)
+- **ElevenLabs** — Síntese de voz com IA (voz humana, modelo multilingual v2)
 
 ---
 
 ## 🎯 Próximos Passos
 
-1. **Adicionar mais comandos** - Expandir voice_commands.json
-2. **Interface de configuração** - UI para criar comandos
-3. **Histórico** - Salvar comandos executados
-4. **Macros** - Sequências de comandos
-5. **Modo background** - Sempre ouvindo
-6. **Multi-plataforma** - Linux e macOS
+1. **Melhorar compreensão de IA** - Expandir a capacidade do Groq
+2. **Voz mais natural** - ElevenLabs já integrado (modelo multilingual v2)
+3. **Interface de configuração** - UI para criar comandos personalizados
+4. **Histórico** - Salvar comandos executados
+5. **Macros** - Sequências de comandos automáticos
+6. **Modo background** - Sempre ouvindo
+7. **Aplicativo nativo** - Migrar de página web para app desktop
+8. **Multi-plataforma** - Linux e macOS
 
 ---
 

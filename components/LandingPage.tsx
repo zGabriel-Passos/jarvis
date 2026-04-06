@@ -1,6 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+function base64ToAudioBlob(base64: string): Blob {
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return new Blob([bytes], { type: 'audio/mpeg' })
+}
 
 export default function LandingPage() {
   const [isListening, setIsListening] = useState(false)
@@ -9,6 +18,7 @@ export default function LandingPage() {
   const [isThinking, setIsThinking] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [recognition, setRecognition] = useState<any>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const restartRecognition = (rec: any) => {
     try {
@@ -20,27 +30,67 @@ export default function LandingPage() {
   }
 
   const speak = (text: string) => {
+    // Fallback: if no Edge TTS audio data, use browser synth
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
     window.speechSynthesis.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'pt-BR'
     utterance.rate = 1.1
     utterance.pitch = 1.0
 
-    utterance.onstart = () => {
-      setIsSpeaking(true)
-      if (recognition) {
-        try { recognition.stop() } catch {}
-      }
-    }
-
+    utterance.onstart = () => setIsSpeaking(true)
     utterance.onend = () => {
       setIsSpeaking(false)
-      if (isListening && recognition) {
-        restartRecognition(recognition)
-      }
+      if (isListening && recognition) restartRecognition(recognition)
     }
 
     window.speechSynthesis.speak(utterance)
+  }
+
+  const playTtsAudio = (text: string, audioBase64: string | null) => {
+    if (audioBase64) {
+      window.speechSynthesis.cancel()
+      if (audioRef.current) {
+        audioRef.current.pause()
+      }
+      try {
+        const audioBlob = base64ToAudioBlob(audioBase64)
+        const audioUrl = URL.createObjectURL(audioBlob)
+        const audio = new Audio(audioUrl)
+        audioRef.current = audio
+
+        audio.addEventListener('play', () => {
+          console.log('ElevenLabs audio started playing')
+          setIsSpeaking(true)
+        })
+        audio.onended = () => {
+          console.log('ElevenLabs audio ended')
+          setIsSpeaking(false)
+          URL.revokeObjectURL(audioUrl)
+          audioRef.current = null
+          if (isListening && recognition) restartRecognition(recognition)
+        }
+        audio.onerror = (e) => {
+          console.error('ElevenLabs audio error:', e)
+          setIsSpeaking(false)
+          URL.revokeObjectURL(audioUrl)
+          audioRef.current = null
+          speak(text)
+        }
+        audio.play().catch((e) => {
+          console.error('ElevenLabs audio play() failed:', e)
+          speak(text)
+        })
+      } catch (e) {
+        console.error('ElevenLabs TTS catch:', e)
+        speak(text)
+      }
+    } else {
+      speak(text)
+    }
   }
 
   useEffect(() => {
@@ -70,11 +120,11 @@ export default function LandingPage() {
             setIsThinking(false)
 
             if (data.status === 'executed') {
-              if (data.speech) speak(data.speech)
+              if (data.speech) playTtsAudio(data.speech, data.audio ?? null)
               setStatus('✅ Executado')
             } else {
               setStatus('❌ Erro ao processar')
-              if (data.speech) speak(data.speech)
+              if (data.speech) playTtsAudio(data.speech, data.audio ?? null)
             }
           } catch (error) {
             setIsThinking(false)
@@ -97,6 +147,10 @@ export default function LandingPage() {
 
     if (isSpeaking) {
       window.speechSynthesis.cancel()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
       setIsSpeaking(false)
       setStatus('🔇 Silenciado')
       if (isListening && recognition) restartRecognition(recognition)
@@ -108,6 +162,10 @@ export default function LandingPage() {
       setIsListening(false)
       setStatus('Parado')
       window.speechSynthesis.cancel()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
     } else {
       recognition.start()
       setIsListening(true)

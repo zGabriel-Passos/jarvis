@@ -2,6 +2,15 @@
 
 import { useState, useEffect } from 'react'
 
+function base64ToAudioBlob(base64: string): Blob {
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return new Blob([bytes], { type: 'audio/mpeg' })
+}
+
 export default function VoiceAssistant() {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -32,7 +41,20 @@ export default function VoiceAssistant() {
             const data = await response.json()
             
             if (data.status === 'executed') {
-              setStatus(`✅ Comando executado: ${data.command}`)
+              // Play Edge TTS audio if available
+              if (data.audio) {
+                try {
+                  const audioBlob = base64ToAudioBlob(data.audio)
+                  const audioUrl = URL.createObjectURL(audioBlob)
+                  const audio = new Audio(audioUrl)
+                  audio.onended = () => URL.revokeObjectURL(audioUrl)
+                  audio.onerror = () => URL.revokeObjectURL(audioUrl)
+                  await audio.play()
+                } catch (e) {
+                  console.error('Audio play error:', e)
+                }
+              }
+              setStatus(`✅ Comando executado: ${data.speech}`)
             } else {
               setStatus('❌ Comando não reconhecido')
             }

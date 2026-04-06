@@ -6,6 +6,7 @@ import requests
 import json
 import time
 import os
+import base64
 
 load_dotenv()
 
@@ -14,6 +15,8 @@ CORS(app)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+ELEVENLABS_URL = "https://api.elevenlabs.io/v1/text-to-speech"
 
 def load_system_prompt():
     with open("system_prompt.md", "r", encoding="utf-8") as f:
@@ -71,6 +74,35 @@ def execute_action(action_info):
     elif action == "sleep":
         time.sleep(args[0])
 
+def synthesize_speech(text):
+    # Voz ElevenLabs: Antoni (masculina, calma, boa pra PT-BR)
+    voice_id = "ErXwobaYiN019PkySvjV"  # Antoni
+    headers = {
+        "xi-api-key": ELEVENLABS_API_KEY,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "text": text,
+        "model_id": "eleven_multilingual_v2",
+        "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.75
+        }
+    }
+    print(f"ElevenLabs TTS: gerando áudio para: {text}")
+    response = requests.post(
+        f"{ELEVENLABS_URL}/{voice_id}",
+        headers=headers,
+        json=payload
+    )
+    if response.status_code == 200:
+        audio_b64 = base64.b64encode(response.content).decode("utf-8")
+        print(f"ElevenLabs TTS: áudio gerado com sucesso, {len(audio_b64)} chars base64")
+        return audio_b64
+    else:
+        print(f"ElevenLabs TTS: ERRO status {response.status_code}: {response.text}")
+    return None
+
 @app.route("/execute", methods=["POST"])
 def execute():
     data = request.json
@@ -86,16 +118,20 @@ def execute():
         for tool in tools:
             execute_action(tool)
 
+        audio_b64 = synthesize_speech(speech)
+
         return jsonify({
             "status": "executed",
-            "speech": speech
+            "speech": speech,
+            "audio": audio_b64
         })
 
     except Exception as e:
         print(f"Erro: {e}")
         return jsonify({
             "status": "error",
-            "speech": "Desculpe, houve um erro. Tente novamente."
+            "speech": "Desculpe, houve um erro. Tente novamente.",
+            "audio": None
         })
 
 if __name__ == "__main__":

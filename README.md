@@ -1,7 +1,9 @@
 # 🤖 Jarvis — Assistente de Voz com IA
 
+> **Em construção!** O Jarvis ainda está em desenvolvimento e é relativamente limitado por rodar no browser. A IA já funciona para comandos básicos, mas ainda há muito a melhorar.
+
 Controle seu computador usando apenas sua voz! Assistente inteligente com IA que entende comandos naturais e executa ações no seu PC rodando no seu navegador.
-> **Stack resumida:** `Python` · `NexyJS` · `Flask` · `Groq (LLaMA 3.3)` · `PyAutoGUI`
+> **Stack resumida:** `Python` · `Next.js` · `Flask` · `Groq (LLaMA 3.3)` · `PyAutoGUI` · `ElevenLabs`
 
 ![Jarvis Preview](./assets/preview.png)
 
@@ -10,7 +12,7 @@ Controle seu computador usando apenas sua voz! Assistente inteligente com IA que
 - 🧠 **IA como cérebro** — Groq (Llama 3.3) decide o que fazer com qualquer comando
 - 🎯 **Entende linguagem natural** — Fale como quiser, a IA interpreta
 - ⚡ **Execução inteligente** — Abre apps, digita textos, pressiona teclas automaticamente
-- 🗣️ **Feedback por voz** — Resposta natural usando síntese de voz
+- 🗣️ **Feedback por voz com ElevenLabs** — Resposta natural com voz humana e realista (IA de texto para fala)
 - 🔒 **API Key local** — Sua chave fica no seu PC
 - 🌐 **Bilíngue** — Fale em Português ou Inglês
 
@@ -20,7 +22,7 @@ Controle seu computador usando apenas sua voz! Assistente inteligente com IA que
 ┌─────────────────────────────────────┐
 │  Frontend (Next.js)                 │
 │  - Web Speech API (reconhecimento)  │
-│  - Speech Synthesis (voz)           │
+│  - ElevenLabs (síntese de voz, via API) │
 │  - Interface React                  │
 └──────────────┬──────────────────────┘
                │ HTTP (localhost:5000)
@@ -29,11 +31,12 @@ Controle seu computador usando apenas sua voz! Assistente inteligente com IA que
 │  Backend (Python Flask)             │
 │  - Envia texto para Groq AI         │
 │  - IA interpreta e decide           │
+│  - ElevenLabs gera áudio com voz    │
 │  - pyautogui executa comandos       │
 └─────────────────────────────────────┘
 
 ┌─────────────────────────────────────┐
-│  Groq Cloud (IA LLaMA 3.3)         │
+│  Groq Cloud (IA LLaMA 3.3)          │
 │  - Compreende linguagem natural     │
 │  - Retorna ações pyautogui + fala   │
 └─────────────────────────────────────┘
@@ -153,7 +156,7 @@ jarvis-simple/
 │   ├── main.py              # Servidor Flask + integração Groq
 │   ├── system_prompt.md     # Prompt do sistema da IA
 │   ├── .env                 # Groq API Key (sua chave)
-│   ├── .env.example         # Modelo para copiar
+│   ├── .env.example         # Modelo para copiar, ou renomeie para .env
 │   └── requirements.txt     # Dependências Python
 ├── README.md                # Este arquivo
 └── COMANDOS.md              # Exemplos de comandos
@@ -165,11 +168,12 @@ jarvis-simple/
 - **Next.js 14** — Framework React
 - **TypeScript** — Tipagem estática
 - **Tailwind CSS** — Estilização
-- **Web Speech API** — Reconhec. e síntese de voz
+- **Web Speech API** — Reconhecimento de voz
 
 ### Backend
 - **Flask** — Framework web Python
 - **Groq API** — IA para compreensão de linguagem (Llama 3.3)
+- **ElevenLabs** — Síntese de voz com IA (voz humana e natural)
 - **pyautogui** — Automação do sistema
 
 ## 🔧 Troubleshooting
@@ -192,4 +196,4 @@ jarvis-simple/
 
 MIT License
 
-**Desenvolvido com ❤️ usando Next.js, Python e Groq AI**
+**Desenvolvido com ❤️ usando Next.js, Python, Groq AI e ElevenLabs**
