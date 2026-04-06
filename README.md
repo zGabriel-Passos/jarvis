@@ -2,6 +2,8 @@
 
 Controle seu computador usando apenas sua voz! Assistente inteligente com IA que entende comandos naturais e executa ações no seu PC.
 
+![Jarvis Preview](./assets/preview.png)
+
 ## ✨ Características
 
 - 🧠 **IA como cérebro** — Groq (Llama 3.3) decide o que fazer com qualquer comando
