@@ -1,5 +1,4 @@
 # 🤖 Jarvis — Assistente de Voz com IA 
-###### (EM CONSTRUÇÃO)
 
 > **Em construção!** O Jarvis ainda está em desenvolvimento e é relativamente limitado por rodar no browser. A IA já funciona para comandos básicos, mas ainda há muito a melhorar.
 
