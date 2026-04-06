@@ -1,17 +1,15 @@
-# 🎤 VoiceAI - Assistente de Voz para PC - SEM IA
+# 🤖 Jarvis — Assistente de Voz com IA
 
-Controle seu computador usando apenas sua voz! Assistente inteligente que executa comandos do sistema através de reconhecimento de voz.
-
-![Jarvis Voice Assistant](./public/screenshot-1771885194253.png)
+Controle seu computador usando apenas sua voz! Assistente inteligente com IA que entende comandos naturais e executa ações no seu PC.
 
 ## ✨ Características
 
-- 🎯 **Reconhecimento de voz preciso** - Web Speech API do navegador
-- ⚡ **Execução instantânea** - Comandos executados em tempo real
-- 🗣️ **Feedback por voz** - Resposta natural usando síntese de voz
-- 🔒 **100% Local** - Tudo roda no seu PC, privacidade total
-- 🌐 **Bilíngue** - Suporte para Português e Inglês
-- 🎨 **Interface moderna** - Landing page responsiva e elegante
+- 🧠 **IA como cérebro** — Groq (Llama 3.3) decide o que fazer com qualquer comando
+- 🎯 **Entende linguagem natural** — Fale como quiser, a IA interpreta
+- ⚡ **Execução inteligente** — Abre apps, digita textos, pressiona teclas automaticamente
+- 🗣️ **Feedback por voz** — Resposta natural usando síntese de voz
+- 🔒 **API Key local** — Sua chave fica no seu PC
+- 🌐 **Bilíngue** — Fale em Português ou Inglês
 
 ## 🏗️ Arquitetura
 
@@ -26,8 +24,15 @@ Controle seu computador usando apenas sua voz! Assistente inteligente que execut
                ▼
 ┌─────────────────────────────────────┐
 │  Backend (Python Flask)             │
-│  - Processa comandos                │
-│  - pyautogui (controle do sistema)  │
+│  - Envia texto para Groq AI         │
+│  - IA interpreta e decide           │
+│  - pyautogui executa comandos       │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│  Groq Cloud (IA LLaMA 3.3)         │
+│  - Compreende linguagem natural     │
+│  - Retorna ações pyautogui + fala   │
 └─────────────────────────────────────┘
 ```
 
@@ -38,100 +43,98 @@ Controle seu computador usando apenas sua voz! Assistente inteligente que execut
 - Node.js 18+
 - Python 3.8+
 - Windows (para pyautogui)
+- Groq API Key (configurada em `.env`)
 
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/zGabriel-Passos/jarvis-simple.git
-cd jarvis-simple
-```
-
-### 2. Instale dependências do Frontend
+### 1. Instale dependências do Frontend
 
 ```bash
 npm install
 ```
 
-### 3. Instale dependências do Backend
+### 2. Instale dependências do Backend
 
 ```bash
 cd backend-python
 pip install -r requirements.txt
 ```
 
+### 3. Configure a API Key
+
+```bash
+cd backend-python
+copy .env.example .env
+```
+
+Abra o arquivo `.env` e cole sua Groq API Key.
+
+> Obtenha uma chave gratuita em [console.groq.com](https://console.groq.com)
+
 ## 🎮 Como Usar
 
-> ⚠️ **IMPORTANTE:** Este projeto precisa de **2 servidores rodando simultaneamente**:
-> - **Terminal 1:** Servidor Python (Backend) na porta 5000
-> - **Terminal 2:** Servidor Next.js (Frontend) na porta 3000
+> ⚠️ **IMPORTANTE:** São necessários **2 servidores rodando simultaneamente**
 
-### 1. Inicie o Backend Python (Terminal 1)
+### 4. Backend Python (Terminal 1)
 
 ```bash
 cd backend-python
 python main.py
 ```
 
-✅ O servidor Flask rodará em `http://localhost:5000`
+✅ Flask vai rodar em `http://localhost:5000`
 
-### 2. Inicie o Frontend Next.js (Terminal 2)
-
-Abra um **NOVO terminal** (deixe o Python rodando) e execute:
+### 5. Frontend Next.js (Terminal 2)
 
 ```bash
 npm run dev
 ```
 
-✅ O frontend rodará em `http://localhost:3000`
+✅ Frontend vai rodar em `http://localhost:3000`
 
-### 3. Use o Assistente
+### 6. Use o Jarvis
 
 1. Abra http://localhost:3000 no navegador
-2. Clique no botão roxo do microfone
-3. Permita acesso ao microfone quando solicitado
-4. Fale um comando (ex: "abra o navegador")
-5. O assistente responderá e executará o comando!
+2. Clique no botão do microfone
+3. Permita acesso ao microfone
+4. **Fale naturalmente** — a IA entende e executa!
 
-### 📺 Exemplo Visual dos Terminais
+## 💡 Exemplos de Comandos
 
+### Abrir apps
+- "Abre o Roblox pra mim" → A IA abre o Roblox
+- "Abre o navegador" → Abre o Edge
+- "Abre o WhatsApp" → Abre o WhatsApp
+- "Open Spotify" → Abre o Spotify
+
+### Controlar o PC
+- "Nova aba" → Ctrl+T
+- "Fecha a aba" → Ctrl+W
+- "Minimiza essa janela" → Win+↓
+- "Maximiza" → Win+↑
+- "Copia isso" → Ctrl+C
+- "Cola" → Ctrl+V
+
+### Digitar e teclas
+- "Escreva oi tudo bem" → Digita o texto
+- "Pressiona Enter" → Enter
+- "Pressiona F11" → Tela cheia
+
+### Conversar
+- "Oi, tudo bem?" → A IA responde naturalmente
+- "Quem é você?" → A IA se apresenta
+
+## 🧠 Como a IA funciona
+
+A IA recebe seu texto, entende a intenção e retorna:
+- **tools**: lista de comandos pyautogui para executar
+- **speech**: resposta em PT-BR que será lida em voz alta
+
+Exemplo de resposta da IA:
+```json
+{
+  "tools": [{"action": "open_app", "args": ["Edge"]}],
+  "speech": "Abrindo o Edge para você."
+}
 ```
-Terminal 1 (Python):              Terminal 2 (Next.js):
-┌─────────────────────┐          ┌─────────────────────┐
-│ $ cd backend-python │          │ $ npm run dev       │
-│ $ python main.py    │          │                     │
-│                     │          │ ▲ Next.js 14.0.0    │
-│ * Running on        │          │ - Local: :3000      │
-│   http://127.0.0.1  │          │                     │
-│   :5000             │          │ ✓ Ready in 2.5s     │
-│                     │          │                     │
-│ [MANTENHA ABERTO]   │          │ [MANTENHA ABERTO]   │
-└─────────────────────┘          └─────────────────────┘
-```
-
-## 📝 Comandos Disponíveis
-
-Veja a lista completa em [COMANDOS.md](COMANDOS.md)
-
-### Exemplos Rápidos:
-
-- **"abra o whatsapp"** - Abre o WhatsApp
-- **"nova aba"** - Abre nova aba no navegador (Ctrl+T)
-- **"copiar"** - Copia seleção (Ctrl+C)
-- **"escreva olá mundo"** - Digita "olá mundo"
-- **"pressione enter"** - Pressiona a tecla Enter
-
-## 🛠️ Tecnologias
-
-### Frontend
-- **Next.js 14** - Framework React
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Estilização
-- **Web Speech API** - Reconhecimento e síntese de voz
-
-### Backend
-- **Flask** - Framework web Python
-- **pyautogui** - Automação do sistema
-- **Flask-CORS** - Comunicação cross-origin
 
 ## 📁 Estrutura do Projeto
 
@@ -144,42 +147,27 @@ jarvis-simple/
 ├── components/              # Componentes React
 │   └── LandingPage.tsx      # Landing page + assistente
 ├── backend-python/          # API Python
-│   ├── main.py              # Servidor Flask
-│   ├── voice_commands.json  # Configuração de comandos
+│   ├── main.py              # Servidor Flask + integração Groq
+│   ├── system_prompt.md     # Prompt do sistema da IA
+│   ├── .env                 # Groq API Key (sua chave)
+│   ├── .env.example         # Modelo para copiar
 │   └── requirements.txt     # Dependências Python
 ├── README.md                # Este arquivo
-└── COMANDOS.md              # Lista de comandos
+└── COMANDOS.md              # Exemplos de comandos
 ```
 
-## ⚙️ Configuração
+## 🔧 Tecnologias
 
-### Adicionar Novos Comandos
+### Frontend
+- **Next.js 14** — Framework React
+- **TypeScript** — Tipagem estática
+- **Tailwind CSS** — Estilização
+- **Web Speech API** — Reconhec. e síntese de voz
 
-Edite `backend-python/voice_commands.json`:
-
-```json
-{
-  "sentence": ["seu comando", "variação do comando"],
-  "action": "nome_da_acao",
-  "keys": ["ctrl", "tecla"],
-  "delay": 0.2,
-  "speak": "Texto que o assistente falará"
-}
-```
-
-### Comandos Dinâmicos
-
-Para comandos que capturam texto adicional:
-
-```json
-{
-  "sentence": ["escreva"],
-  "action": "write_text",
-  "type": "dynamic",
-  "delay": 0.1,
-  "speak": "Escrevendo"
-}
-```
+### Backend
+- **Flask** — Framework web Python
+- **Groq API** — IA para compreensão de linguagem (Llama 3.3)
+- **pyautogui** — Automação do sistema
 
 ## 🔧 Troubleshooting
 
@@ -190,29 +178,15 @@ Para comandos que capturam texto adicional:
 
 ### Comandos não executam
 - Verifique se o backend Python está rodando
-- Teste a API: `curl -X POST http://localhost:5000/execute -H "Content-Type: application/json" -d "{\"text\":\"copiar\"}"`
+- Verifique se a `GROQ_API_KEY` está correta no `.env`
+- Teste: `curl -X POST http://localhost:5000/execute -H "Content-Type: application/json" -d "{\"text\":\"ola\"}"`
 
-### Erro de CORS
-- Certifique-se que flask-cors está instalado
-- Backend deve rodar na porta 5000
-
-## 🎯 Roadmap
-
-- [ ] Adicionar mais comandos pré-configurados
-- [ ] Interface para criar comandos personalizados
-- [ ] Histórico de comandos executados
-- [ ] Suporte para macros (sequência de comandos)
-- [ ] Modo "sempre ouvindo" em background
-- [ ] Suporte para Linux e macOS
+### Erro 401 ou sem resposta da IA
+- Verifique se sua API key Groq é válida
+- Verifique conexão com internet
 
 ## 📄 Licença
 
-MIT License - Sinta-se livre para usar e modificar!
+MIT License
 
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Abra uma issue ou pull request.
-
----
-
-**Desenvolvido com ❤️ usando Next.js e Python**
+**Desenvolvido com ❤️ usando Next.js, Python e Groq AI**

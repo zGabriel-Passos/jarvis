@@ -1,82 +1,102 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 import pyautogui as py
+import requests
 import json
-import unicodedata
-import re
+import time
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-def normalize_text(text):
-    text = unicodedata.normalize('NFD', text)
-    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
-    text = re.sub(r'[^\w\s]', '', text)
-    return ' '.join(text.split()).lower()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-def load_commands():
-    with open('voice_commands.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+def load_system_prompt():
+    with open("system_prompt.md", "r", encoding="utf-8") as f:
+        return f.read()
 
-def execute_command(keys, delay=0.2):
-    import time
-    if len(keys) == 1:
-        py.press(keys[0])
-    elif len(keys) == 2:
-        if keys[0] == 'win':
-            # Se o segundo elemento for uma seta, usa hotkey
-            if keys[1] in ['up', 'down', 'left', 'right']:
-                py.hotkey('win', keys[1])
-            # Caso contrário, abre app
-            else:
-                py.press('win')
-                time.sleep(delay)
-                py.write(keys[1])
-                time.sleep(delay)
-                py.press('enter')
-        else:
-            py.hotkey(*keys)
-    else:
-        py.hotkey(*keys)
-    time.sleep(0.1)
+def call_groq(user_text):
+    system_prompt = load_system_prompt()
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {GROQ_API_KEY}"
+    }
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_text}
+        ],
+        "temperature": 0.3,
+        "max_tokens": 500
+    }
+    response = requests.post(GROQ_URL, headers=headers, json=payload)
+    data = response.json()
+    return data["choices"][0]["message"]["content"]
+
+def parse_ai_response(text):
+    # try to extract JSON from response
+    if "```json" in text:
+        text = text.split("```json")[1].split("```")[0].strip()
+    elif "```" in text:
+        text = text.split("```")[1].split("```")[0].strip()
+    return json.loads(text)
+
+def execute_action(action_info):
+    action = action_info["action"]
+    args = action_info.get("args", [])
+    py.PAUSE = 0.1
+
+    if action == "open_app":
+        app_name = args[0]
+        py.press("win")
+        time.sleep(0.5)
+        py.write(app_name)
+        time.sleep(0.3)
+        py.press("enter")
+
+    elif action == "write":
+        py.write(args[0])
+
+    elif action == "press":
+        py.press(args[0])
+
+    elif action == "hotkey":
+        py.hotkey(*args)
+
+    elif action == "sleep":
+        time.sleep(args[0])
 
 @app.route("/execute", methods=["POST"])
 def execute():
     data = request.json
-    text = normalize_text(data.get('text', ''))
-    config = load_commands()
-    
-    wake_word = normalize_text(config['wake_word'])
-    
-    # Se não há wake word, processa diretamente
-    if not wake_word or wake_word in text or wake_word == "":
-        for cmd in config['commands']:
-            sentences = cmd['sentence'] if isinstance(cmd['sentence'], list) else [cmd['sentence']]
-            for sentence in sentences:
-                cmd_normalized = normalize_text(sentence)
-                
-                if cmd.get('type') == 'dynamic' and cmd_normalized in text:
-                    text_to_process = text.split(cmd_normalized, 1)[1].strip()
-                    if text_to_process:
-                        # Se for comando de pressionar tecla
-                        if cmd['action'] == 'press_key':
-                            py.press(text_to_process)
-                        # Se for comando de escrever
-                        else:
-                            py.write(text_to_process)
-                        return jsonify({"status": "executed", "command": cmd['action'], "speech": cmd.get('speak', '')})
-                
-                elif cmd_normalized in text:
-                    # Se for comando sem execução (apenas fala)
-                    if cmd.get('no_execute'):
-                        return jsonify({"status": "executed", "command": cmd['action'], "speech": cmd.get('speak', '')})
-                    
-                    execute_command(cmd['keys'], cmd.get('delay', 0.2))
-                    return jsonify({"status": "executed", "command": cmd['action'], "speech": cmd.get('speak', '')})
-        
-        return jsonify({"status": "no_command"})
-    
-    return jsonify({"status": "no_wake_word"})
+    user_text = data.get("text", "").strip()
+
+    try:
+        ai_text = call_groq(user_text)
+        ai_data = parse_ai_response(ai_text)
+
+        tools = ai_data.get("tools", [])
+        speech = ai_data.get("speech", "Comando executado.")
+
+        for tool in tools:
+            execute_action(tool)
+
+        return jsonify({
+            "status": "executed",
+            "speech": speech
+        })
+
+    except Exception as e:
+        print(f"Erro: {e}")
+        return jsonify({
+            "status": "error",
+            "speech": "Desculpe, houve um erro. Tente novamente."
+        })
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

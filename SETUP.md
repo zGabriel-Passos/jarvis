@@ -1,51 +1,64 @@
-# 🎤 Assistente de Voz - Next.js + Python
+# 🤖 Jarvis — Setup
 
-Assistente de voz que usa Web Speech API (Next.js) para reconhecimento e Python (pyautogui) para executar comandos no sistema.
+Assistente de voz com IA (Groq) que controla seu PC.
 
-## 🚀 Como Usar
+## 🚀 Como Configurar e Usar
 
 ### 1. Instalar dependências Python
+
 ```bash
 cd backend-python
 pip install -r requirements.txt
 ```
 
-### 2. Iniciar API Python
+### 2. Configurar a API Key
+
+```bash
+cd backend-python
+copy .env.example .env
+```
+
+Abra o `.env` e cole sua Groq API Key:
+
+```
+GROQ_API_KEY=sua_chave_aqui
+```
+
+Obtenha uma chave grátis em [console.groq.com](https://console.groq.com).
+
+### 3. Iniciar Backend Python
+
 ```bash
 cd backend-python
 python main.py
 ```
-A API rodará em `http://localhost:5000`
 
-### 3. Iniciar Next.js (em outro terminal)
+API rodará em `http://localhost:5000`
+
+### 4. Iniciar Frontend Next.js (outro terminal)
+
 ```bash
 npm run dev
 ```
-O frontend rodará em `http://localhost:3000`
 
-### 4. Testar
+Frontend rodará em `http://localhost:3000`
+
+### 5. Começar a Usar
+
 1. Abra http://localhost:3000
-2. Clique em "🎙️ Começar"
-3. Fale: "edge abra o navegador"
-4. O comando será executado!
+2. Clique no microfone
+3. **Fale naturalmente!** — A IA entende qualquer comando
 
-## 📝 Comandos Disponíveis
+### 💬 Exemplos
 
-- "edge abra o navegador" - Abre o Edge
-- "edge nova aba" - Ctrl+T
-- "edge feche a aba" - Ctrl+W
-- "edge copiar" - Ctrl+C
-- "edge colar" - Ctrl+V
-- "edge salvar" - Ctrl+S
-- "edge escreva [texto]" - Escreve o texto
-- "edge minimizar" - Win+Down
-- "edge maximizar" - Win+Up
+| Você fala | A IA faz |
+|-----------|----------|
+| "Abre o navegador" | Abre o Edge |
+| "Escreva hello world" | Digita o texto |
+| "Nova aba" | Ctrl+T no navegador |
+| "Oi tudo bem?" | Responde em PT-BR |
 
 ## 🔧 Arquitetura
 
-- **Frontend (Next.js)**: Web Speech API para reconhecimento de voz
-- **Backend (Python)**: Flask API + pyautogui para executar comandos
-
-## ⚙️ Configuração
-
-Edite `backend-python/voice_commands.json` para adicionar novos comandos.
+- **Frontend**: Next.js + Web Speech API
+- **Backend**: Flask + Groq AI + pyautogui

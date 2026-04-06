@@ -6,13 +6,40 @@ export default function LandingPage() {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [status, setStatus] = useState('Pronto para ouvir')
+  const [isThinking, setIsThinking] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const [recognition, setRecognition] = useState<any>(null)
 
+  const restartRecognition = (rec: any) => {
+    try {
+      rec.stop()
+    } catch {}
+    setTimeout(() => {
+      try { rec.start() } catch {}
+    }, 100)
+  }
+
   const speak = (text: string) => {
+    window.speechSynthesis.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'pt-BR'
     utterance.rate = 1.1
     utterance.pitch = 1.0
+
+    utterance.onstart = () => {
+      setIsSpeaking(true)
+      if (recognition) {
+        try { recognition.stop() } catch {}
+      }
+    }
+
+    utterance.onend = () => {
+      setIsSpeaking(false)
+      if (isListening && recognition) {
+        restartRecognition(recognition)
+      }
+    }
+
     window.speechSynthesis.speak(utterance)
   }
 
@@ -32,20 +59,25 @@ export default function LandingPage() {
 
         if (event.results[current].isFinal) {
           try {
+            setIsThinking(true)
+            setStatus('🧠 Pensando...')
             const response = await fetch('http://localhost:5000/execute', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ text: transcriptText })
             })
             const data = await response.json()
+            setIsThinking(false)
 
             if (data.status === 'executed') {
               if (data.speech) speak(data.speech)
-              setStatus(`✅ ${data.command}`)
+              setStatus('✅ Executado')
             } else {
-              setStatus('❌ Comando não reconhecido')
+              setStatus('❌ Erro ao processar')
+              if (data.speech) speak(data.speech)
             }
           } catch (error) {
+            setIsThinking(false)
             setStatus('⚠️ Erro ao conectar')
           }
         }
@@ -63,10 +95,19 @@ export default function LandingPage() {
   const toggleListening = () => {
     if (!recognition) return
 
+    if (isSpeaking) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+      setStatus('🔇 Silenciado')
+      if (isListening && recognition) restartRecognition(recognition)
+      return
+    }
+
     if (isListening) {
       recognition.stop()
       setIsListening(false)
       setStatus('Parado')
+      window.speechSynthesis.cancel()
     } else {
       recognition.start()
       setIsListening(true)
