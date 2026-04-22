@@ -1,9 +1,11 @@
 {
   "name": "jarvis-simple",
   "version": "0.1.0",
+  "main": "electron/main.cjs",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "desktop": "node scripts/desktop-dev.cjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -18,6 +20,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^41.2.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",

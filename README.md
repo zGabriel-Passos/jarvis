@@ -1,199 +1,129 @@
-# 🤖 Jarvis — Assistente de Voz com IA 
+# Jarvis
 
-> **Em construção!** O Jarvis ainda está em desenvolvimento e é relativamente limitado por rodar no browser. A IA já funciona para comandos básicos, mas ainda há muito a melhorar.
+Assistente de voz desktop para Windows com `Electron`, `Next.js` e `Flask`.
 
-Controle seu computador usando apenas sua voz! Assistente inteligente com IA que entende comandos naturais e executa ações no seu PC rodando no seu navegador.
-> **Stack resumida:** `Python` · `Next.js` · `Flask` · `Groq (LLaMA 3.3)` · `PyAutoGUI` · `ElevenLabs`
+Jarvis captura sua fala no app desktop, transcreve o audio com Groq Whisper, interpreta o comando com Groq LLaMA, executa a automacao local com `pyautogui` e responde com audio pela ElevenLabs.
 
-![Jarvis Preview](./assets/preview.png)
+## Stack
 
-## ✨ Características
+- `Electron` para janela desktop
+- `Next.js` para interface
+- `Flask` para API local e automacao
+- `Groq` para transcricao e interpretacao
+- `ElevenLabs` para resposta em voz
+- `PyAutoGUI` para comandos no Windows
 
-- 🧠 **IA como cérebro** — Groq (Llama 3.3) decide o que fazer com qualquer comando
-- 🎯 **Entende linguagem natural** — Fale como quiser, a IA interpreta
-- ⚡ **Execução inteligente** — Abre apps, digita textos, pressiona teclas automaticamente
-- 🗣️ **Feedback por voz com ElevenLabs** — Resposta natural com voz humana e realista (IA de texto para fala)
-- 🔒 **API Key local** — Sua chave fica no seu PC
-- 🌐 **Bilíngue** — Fale em Português ou Inglês
+## Arquitetura
 
-## 🏗️ Arquitetura
+```text
+Electron desktop app
+  -> carrega a interface Next.js
+  -> inicia o backend Flask localmente
 
-```
-┌─────────────────────────────────────┐
-│  Frontend (Next.js)                 │
-│  - Web Speech API (reconhecimento)  │
-│  - ElevenLabs (síntese de voz, via API) │
-│  - Interface React                  │
-└──────────────┬──────────────────────┘
-               │ HTTP (localhost:5000)
-               ▼
-┌─────────────────────────────────────┐
-│  Backend (Python Flask)             │
-│  - Envia texto para Groq AI         │
-│  - IA interpreta e decide           │
-│  - ElevenLabs gera áudio com voz    │
-│  - pyautogui executa comandos       │
-└─────────────────────────────────────┘
+Next.js UI
+  -> grava audio pelo microfone
+  -> envia o audio para /transcribe
+  -> envia o texto final para /execute
 
-┌─────────────────────────────────────┐
-│  Groq Cloud (IA LLaMA 3.3)          │
-│  - Compreende linguagem natural     │
-│  - Retorna ações pyautogui + fala   │
-└─────────────────────────────────────┘
+Flask API
+  -> transcreve com Groq Whisper
+  -> interpreta com Groq LLaMA
+  -> executa acoes no Windows
+  -> gera audio de resposta com ElevenLabs
 ```
 
-## 🚀 Instalação
-
-### Pré-requisitos
+## Requisitos
 
 - Node.js 18+
-- Python 3.8+
-- Windows (para pyautogui)
-- Groq API Key (configurada em `.env`)
+- Python 3.10+ recomendado
+- Windows
+- `GROQ_API_KEY`
+- `ELEVENLABS_API_KEY` opcional, mas recomendada
 
-### 1. Instale dependências do Frontend
+## Instalacao
+
+### 1. Dependencias do frontend e Electron
 
 ```bash
 npm install
 ```
 
-### 2. Instale dependências do Backend
+### 2. Dependencias do backend Python
 
 ```bash
 cd backend-python
 pip install -r requirements.txt
 ```
 
-### 3. Configure a API Key
+### 3. Variaveis de ambiente
 
 ```bash
 cd backend-python
 copy .env.example .env
 ```
 
-Abra o arquivo `.env` e cole sua Groq API Key.
+Edite `backend-python/.env` com suas chaves.
 
-> Obtenha uma chave gratuita em [console.groq.com](https://console.groq.com)
+## Rodando o app desktop
 
-## 🎮 Como Usar
-
-> ⚠️ **IMPORTANTE:** São necessários **2 servidores rodando simultaneamente**
-
-### 4. Backend Python (Terminal 1)
+Na raiz do projeto:
 
 ```bash
-cd backend-python
-python main.py
+npm run desktop
 ```
 
-✅ Flask vai rodar em `http://localhost:5000`
+Esse comando:
 
-### 5. Frontend Next.js (Terminal 2)
+1. sobe o Next.js em `http://127.0.0.1:3000`
+2. abre o Electron
+3. faz o Electron iniciar o Flask em `http://127.0.0.1:5000`
 
-```bash
-npm run dev
-```
+## Fluxo de voz
 
-✅ Frontend vai rodar em `http://localhost:3000`
+1. Clique no botao do microfone.
+2. Fale normalmente.
+3. O app detecta silencio e fecha a captura da frase.
+4. O Flask transcreve o audio em `/transcribe`.
+5. O texto vai para `/execute`.
+6. Jarvis executa o comando e toca a resposta em audio.
 
-### 6. Use o Jarvis
+## Endpoints locais
 
-1. Abra http://localhost:3000 no navegador
-2. Clique no botão do microfone
-3. Permita acesso ao microfone
-4. **Fale naturalmente** — a IA entende e executa!
+- `GET /health`
+- `POST /transcribe`
+- `POST /execute`
 
-## 💡 Exemplos de Comandos
+## Comandos de exemplo
 
-### Abrir apps
-- "Abre o Roblox pra mim" → A IA abre o Roblox
-- "Abre o navegador" → Abre o Edge
-- "Abre o WhatsApp" → Abre o WhatsApp
-- "Open Spotify" → Abre o Spotify
+- `abre o navegador`
+- `abra o whatsapp`
+- `nova aba`
+- `copiar`
+- `colar`
+- `escreva bom dia`
+- `pressione enter`
 
-### Controlar o PC
-- "Nova aba" → Ctrl+T
-- "Fecha a aba" → Ctrl+W
-- "Minimiza essa janela" → Win+↓
-- "Maximiza" → Win+↑
-- "Copia isso" → Ctrl+C
-- "Cola" → Ctrl+V
+## Observacoes
 
-### Digitar e teclas
-- "Escreva oi tudo bem" → Digita o texto
-- "Pressiona Enter" → Enter
-- "Pressiona F11" → Tela cheia
+- O reconhecimento de voz nao depende mais de `webkitSpeechRecognition`.
+- A ElevenLabs continua sendo apenas a etapa de texto para fala.
+- Se o comando `py` nao existir na sua maquina, defina `JARVIS_PYTHON_BIN` antes de abrir o Electron.
 
-### Conversar
-- "Oi, tudo bem?" → A IA responde naturalmente
-- "Quem é você?" → A IA se apresenta
+## Estrutura
 
-## 🧠 Como a IA funciona
-
-A IA recebe seu texto, entende a intenção e retorna:
-- **tools**: lista de comandos pyautogui para executar
-- **speech**: resposta em PT-BR que será lida em voz alta
-
-Exemplo de resposta da IA:
-```json
-{
-  "tools": [{"action": "open_app", "args": ["Edge"]}],
-  "speech": "Abrindo o Edge para você."
-}
-```
-
-## 📁 Estrutura do Projeto
-
-```
+```text
 jarvis-simple/
-├── app/                      # Next.js App Router
-│   ├── page.tsx             # Página principal
-│   ├── layout.tsx           # Layout global
-│   └── globals.css          # Estilos globais
-├── components/              # Componentes React
-│   └── LandingPage.tsx      # Landing page + assistente
-├── backend-python/          # API Python
-│   ├── main.py              # Servidor Flask + integração Groq
-│   ├── system_prompt.md     # Prompt do sistema da IA
-│   ├── .env                 # Groq API Key (sua chave)
-│   ├── .env.example         # Modelo para copiar, ou renomeie para .env
-│   └── requirements.txt     # Dependências Python
-├── README.md                # Este arquivo
-└── COMANDOS.md              # Exemplos de comandos
+|-- app/
+|-- assets/
+|-- backend-python/
+|   |-- main.py
+|   |-- requirements.txt
+|   `-- system_prompt.md
+|-- components/
+|-- electron/
+|   |-- main.cjs
+|   `-- preload.cjs
+|-- scripts/
+|   `-- desktop-dev.cjs
+`-- README.md
 ```
-
-## 🔧 Tecnologias
-
-### Frontend
-- **Next.js 14** — Framework React
-- **TypeScript** — Tipagem estática
-- **Tailwind CSS** — Estilização
-- **Web Speech API** — Reconhecimento de voz
-
-### Backend
-- **Flask** — Framework web Python
-- **Groq API** — IA para compreensão de linguagem (Llama 3.3)
-- **ElevenLabs** — Síntese de voz com IA (voz humana e natural)
-- **pyautogui** — Automação do sistema
-
-## 🔧 Troubleshooting
-
-### Microfone não funciona
-- Use Chrome ou Edge (melhor suporte)
-- Permita acesso ao microfone
-- Use HTTPS ou localhost
-
-### Comandos não executam
-- Verifique se o backend Python está rodando
-- Verifique se a `GROQ_API_KEY` está correta no `.env`
-- Teste: `curl -X POST http://localhost:5000/execute -H "Content-Type: application/json" -d "{\"text\":\"ola\"}"`
-
-### Erro 401 ou sem resposta da IA
-- Verifique se sua API key Groq é válida
-- Verifique conexão com internet
-
-## 📄 Licença
-
-MIT License
-
-**Desenvolvido com ❤️ usando Next.js, Python, Groq AI e ElevenLabs**
