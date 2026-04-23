@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #04090f;
+  --foreground: #e2eef7;
+  --panel: #08131f;
+  --panel-strong: #0b1826;
+  --line: rgba(84, 196, 255, 0.16);
+  --glow: rgba(56, 189, 248, 0.22);
 }
 
 @theme inline {
@@ -11,15 +15,123 @@
   --font-sans: var(--font-dm-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), sans-serif;
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::selection {
+  background: rgba(56, 189, 248, 0.25);
+  color: #f8fdff;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #04090f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(91, 191, 255, 0.28);
+  border-radius: 999px;
+  border: 2px solid #04090f;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(91, 191, 255, 0.42);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.035);
+  }
+}
+
+@keyframes orbit-slow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  50% {
+    transform: scale(1.03) rotate(180deg);
+  }
+}
+
+@keyframes float-core {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.8s ease-in-out infinite;
+}
+
+.animate-orbit-slow {
+  animation: orbit-slow 7s linear infinite;
+}
+
+.animate-float-core {
+  animation: float-core 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,10 +1,60 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 const BACKEND_URL = 'http://127.0.0.1:5000'
 const SILENCE_MS = 1200
 const MIN_AUDIO_SIZE = 1024
+
+const featuredCommands = [
+  'abra o whatsapp',
+  'nova aba',
+  'copiar',
+  'colar',
+  'salvar',
+  'pressione enter',
+]
+
+const featureCards = [
+  {
+    title: 'Stack ativa',
+    value: 'Next.js + Electron + Flask',
+    detail: 'UI moderna, janela desktop e automacao local no mesmo fluxo.',
+  },
+  {
+    title: 'Captura por voz',
+    value: 'Deteccao de silencio',
+    detail: 'A gravacao fecha a frase automaticamente antes de enviar.',
+  },
+  {
+    title: 'Resposta falada',
+    value: 'ElevenLabs + fallback',
+    detail: 'Quando necessario, o sintetizador nativo assume a resposta.',
+  },
+]
+
+const steps = [
+  {
+    title: 'Escuta local',
+    text: 'O app abre o microfone, detecta voz e encerra a captura no momento certo.',
+  },
+  {
+    title: 'Interpretacao',
+    text: 'O backend transcreve, entende a intencao e escolhe a acao adequada.',
+  },
+  {
+    title: 'Execucao',
+    text: 'Jarvis responde em voz e dispara a automacao direto no seu Windows.',
+  },
+]
+
+const benefits = [
+  'Landing page e painel do assistente no mesmo frontend.',
+  'Experiencia mobile-friendly sem perder a presenca de app desktop.',
+  'Estados visuais claros para ouvindo, pensando e respondendo.',
+  'CTA, prova tecnica e comandos rapidos integrados na mesma tela.',
+]
 
 function base64ToAudioBlob(base64: string): Blob {
   const binary = atob(base64)
@@ -27,6 +77,59 @@ function getSupportedMimeType() {
   }
 
   return mimeTypes.find((mimeType) => MediaRecorder.isTypeSupported(mimeType)) ?? ''
+}
+
+function Icon({
+  path,
+  className = 'h-5 w-5',
+}: {
+  path: string
+  className?: string
+}) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d={path} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} />
+    </svg>
+  )
+}
+
+function StatusPill({
+  label,
+  tone = 'cyan',
+}: {
+  label: string
+  tone?: 'cyan' | 'green' | 'amber'
+}) {
+  const tones = {
+    cyan: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-200',
+    green: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200',
+    amber: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
+  }
+
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${tones[tone]}`}>
+      <span className="h-2 w-2 rounded-full bg-current" />
+      {label}
+    </span>
+  )
+}
+
+function InfoCard({
+  title,
+  value,
+  detail,
+}: {
+  title: string
+  value: string
+  detail: string
+}) {
+  return (
+    <div className="rounded-[28px] border border-cyan-400/15 bg-slate-950/70 p-5 shadow-[0_18px_45px_rgba(3,12,22,0.35)] backdrop-blur">
+      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-cyan-300/75">{title}</p>
+      <p className="mt-3 text-lg font-semibold text-slate-100">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{detail}</p>
+    </div>
+  )
 }
 
 export default function LandingPage() {
@@ -398,205 +501,286 @@ export default function LandingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const activityLabel = isSpeaking
+    ? 'Respondendo'
+    : isThinking
+      ? 'Pensando'
+      : isListening
+        ? 'Escutando'
+        : 'Em espera'
+
+  const activityTone = isSpeaking ? 'green' : isThinking ? 'amber' : 'cyan'
+
   return (
-    <div className="min-h-screen bg-[#1a1614]">
-      <nav className="fixed top-0 w-full bg-[#1a1614]/80 backdrop-blur-xl border-b border-white/5 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-linear-to-br from-[#d4724a] to-[#b85a35] rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(36,130,192,0.18),_transparent_32%),linear-gradient(180deg,_#07111b_0%,_#04090f_46%,_#02060a_100%)] text-slate-100">
+      <div className="mx-auto max-w-[1600px] px-4 pb-20 pt-4 sm:px-6 lg:px-8">
+        <header className="animate-fade-up mb-6 rounded-[30px] border border-cyan-400/15 bg-slate-950/80 px-4 py-4 shadow-[0_20px_60px_rgba(2,8,16,0.45)] backdrop-blur-xl sm:px-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-lg font-black tracking-[0.45em] text-cyan-200">
+                J.A.R.V.I.S
+              </div>
+              <StatusPill label={isListening ? 'online' : 'standby'} tone={isListening ? 'green' : 'cyan'} />
             </div>
-            <span className="text-[#f0ebe4] font-bold text-xl">Jarvis</span>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="rounded-2xl border border-cyan-400/15 bg-slate-900/70 px-4 py-3">
+                <p className="text-[0.68rem] uppercase tracking-[0.28em] text-slate-500">Modo</p>
+                <p className="mt-1 text-sm font-semibold text-slate-100">Landing + painel do assistente</p>
+              </div>
+              <div className="rounded-2xl border border-cyan-400/15 bg-slate-900/70 px-4 py-3">
+                <p className="text-[0.68rem] uppercase tracking-[0.28em] text-slate-500">Voz</p>
+                <p className="mt-1 text-sm font-semibold text-slate-100">pt-BR com fallback local</p>
+              </div>
+              <div className="rounded-2xl border border-cyan-400/15 bg-slate-900/70 px-4 py-3 sm:col-span-2 xl:col-span-1">
+                <p className="text-[0.68rem] uppercase tracking-[0.28em] text-slate-500">Status</p>
+                <p className="mt-1 text-sm font-semibold text-slate-100">{status}</p>
+              </div>
+            </div>
           </div>
-          <button className="bg-[#d4724a] hover:bg-[#c26640] text-white px-6 py-2.5 rounded-full font-semibold transition-all hover:shadow-lg hover:shadow-[#d4724a]/30">
-            App Desktop
-          </button>
-        </div>
-      </nav>
+        </header>
 
-      <section className="pt-32 pb-24 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#d4724a]/10 border border-[#d4724a]/20 rounded-full mb-8">
-            <div className="w-2 h-2 bg-[#d4724a] rounded-full animate-pulse"></div>
-            <span className="text-[#d4724a] text-sm font-medium">Electron + Next.js + Flask</span>
+        <section className="items-start gap-6 xl:grid xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+          <aside className="animate-fade-up space-y-5 [animation-delay:0.08s]">
+            <div className="rounded-[32px] border border-cyan-400/15 bg-slate-950/75 p-5 shadow-[0_22px_55px_rgba(3,12,22,0.35)] backdrop-blur">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">Painel de recursos</p>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-100">Funcionalidades ativas</h2>
+                </div>
+                <Icon path="M4 12h16M12 4v16" className="h-5 w-5 text-cyan-300/70" />
+              </div>
+              <div className="mt-5 grid gap-4">
+                {featureCards.map((card) => (
+                  <InfoCard key={card.title} {...card} />
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-cyan-400/15 bg-slate-950/75 p-5 backdrop-blur">
+              <div className="flex items-center gap-3">
+                <Icon path="M8 12h8M12 8v8M5 5l14 14" className="h-5 w-5 text-cyan-300" />
+                <div>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">Comandos rapidos</p>
+                  <p className="text-sm text-slate-400">Exemplos que ja funcionam no app.</p>
+                </div>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {featuredCommands.map((command) => (
+                  <span
+                    key={command}
+                    className="rounded-full border border-cyan-400/15 bg-cyan-400/10 px-3 py-2 text-sm text-cyan-100"
+                  >
+                    {command}
+                  </span>
+                ))}
+              </div>
+              <Link
+                href="/comandos"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 transition hover:text-cyan-100"
+              >
+                Ver lista completa
+                <Icon path="M5 12h14M13 5l7 7-7 7" className="h-4 w-4" />
+              </Link>
+            </div>
+          </aside>
+
+          <main className="animate-fade-up rounded-[36px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(4,12,20,0.86),rgba(2,8,14,0.96))] px-6 py-8 shadow-[0_28px_90px_rgba(2,8,16,0.5)] backdrop-blur [animation-delay:0.14s] sm:px-10">
+            <div className="mx-auto max-w-4xl text-center">
+              <StatusPill label="assistente de voz desktop" tone="cyan" />
+              <h1 className="mt-6 text-4xl font-black tracking-[0.14em] text-slate-50 sm:text-5xl lg:text-6xl">
+                J.A.R.V.I.S
+              </h1>
+              <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
+                Uma landing page com cara de sistema operacional: captura de voz, automacao local e feedback falado dentro de um frontend mais moderno, limpo e responsivo.
+              </p>
+            </div>
+
+            <div className="relative mx-auto mt-10 flex min-h-[420px] max-w-4xl items-center justify-center overflow-hidden rounded-[40px] border border-cyan-400/10 bg-[radial-gradient(circle_at_center,_rgba(37,169,255,0.12),_transparent_38%),linear-gradient(180deg,_rgba(5,12,20,0.85),_rgba(3,8,14,0.95))] px-6 py-12">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(73,191,255,0.12),_transparent_20%)]" />
+              <div className="pointer-events-none absolute inset-x-10 top-0 h-24 bg-[radial-gradient(circle_at_top,_rgba(120,210,255,0.16),_transparent_68%)] blur-2xl" />
+              <div className={`pointer-events-none absolute h-[320px] w-[320px] rounded-full border transition-all duration-500 ${isListening ? 'animate-orbit-slow border-cyan-300/60 shadow-[0_0_90px_rgba(56,189,248,0.2)]' : 'border-cyan-400/20'}`} />
+              <div className={`pointer-events-none absolute h-[250px] w-[250px] rounded-full border transition-all duration-500 ${isThinking ? 'animate-pulse-soft border-amber-300/55' : 'border-cyan-400/15'}`} />
+              <div className={`pointer-events-none absolute h-[180px] w-[180px] rounded-full border transition-all duration-500 ${isSpeaking ? 'animate-pulse-soft border-emerald-300/60' : 'border-cyan-400/10'}`} />
+
+              <div className="relative z-10 text-center animate-fade-up [animation-delay:0.22s]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void toggleListening()
+                  }}
+                  disabled={!isSupported}
+                  className={`group relative flex h-48 w-48 items-center justify-center rounded-full border text-cyan-50 transition duration-300 sm:h-56 sm:w-56 ${
+                    isListening
+                      ? 'animate-float-core border-cyan-200/50 bg-cyan-400/15 shadow-[0_0_80px_rgba(56,189,248,0.24)]'
+                      : 'border-cyan-400/25 bg-cyan-400/10 hover:scale-[1.03] hover:border-cyan-200/40 hover:bg-cyan-400/14'
+                  } ${!isSupported ? 'cursor-not-allowed opacity-50' : ''}`}
+                  aria-label={isListening ? 'Desativar escuta' : 'Ativar escuta'}
+                >
+                  <div className={`absolute inset-5 rounded-full border border-cyan-200/10 ${isListening ? 'animate-pulse-soft' : ''}`} />
+                  <div className={`absolute inset-10 rounded-full border border-cyan-200/15 ${isListening ? 'animate-orbit-slow' : ''}`} />
+                  <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-cyan-200/25 bg-slate-900/50">
+                    <Icon
+                      path="M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3Zm6 8a6 6 0 0 1-12 0M12 18v2m-4 0h8"
+                      className="h-11 w-11"
+                    />
+                  </div>
+                </button>
+
+                <h2 className="mt-10 text-3xl font-black tracking-[0.18em] text-slate-100 sm:text-4xl">
+                  J.A.R.V.I.S
+                </h2>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                  <StatusPill label={activityLabel} tone={activityTone} />
+                  {transcript ? <StatusPill label="ultima fala capturada" tone="cyan" /> : null}
+                </div>
+                <p className="mx-auto mt-5 max-w-md text-sm leading-7 text-slate-400 sm:text-base">
+                  Toque no nucleo para iniciar a escuta continua. O backend transcreve, executa e devolve a resposta em voz.
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void toggleListening()
+                    }}
+                    disabled={!isSupported}
+                    className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <Icon path="M12 5v14M5 12h14" className="h-4 w-4" />
+                    {isListening ? 'Parar assistente' : 'Ativar assistente'}
+                  </button>
+                  <Link
+                    href="/comandos"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300/30 hover:text-cyan-100"
+                  >
+                    <Icon path="M4 7h16M4 12h16M4 17h16" className="h-4 w-4" />
+                    Ver comandos
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              <div className="rounded-[28px] border border-cyan-400/15 bg-slate-950/75 p-5 transition-transform duration-300 hover:-translate-y-1">
+                <p className="text-[0.68rem] uppercase tracking-[0.25em] text-slate-500">Compatibilidade</p>
+                <p className="mt-2 text-base font-semibold text-slate-100">Windows desktop</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">Pensado para uso real com automacao local e janela empacotada via Electron.</p>
+              </div>
+              <div className="rounded-[28px] border border-cyan-400/15 bg-slate-950/75 p-5 transition-transform duration-300 hover:-translate-y-1">
+                <p className="text-[0.68rem] uppercase tracking-[0.25em] text-slate-500">Entrada</p>
+                <p className="mt-2 text-base font-semibold text-slate-100">Microfone com deteccao de pausa</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">Nada de manter botao pressionado para cada frase.</p>
+              </div>
+              <div className="rounded-[28px] border border-cyan-400/15 bg-slate-950/75 p-5 transition-transform duration-300 hover:-translate-y-1">
+                <p className="text-[0.68rem] uppercase tracking-[0.25em] text-slate-500">Saida</p>
+                <p className="mt-2 text-base font-semibold text-slate-100">Voz de retorno e status na interface</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">O usuario ve o fluxo e escuta a confirmacao no mesmo painel.</p>
+              </div>
+            </div>
+          </main>
+
+          <aside className="animate-fade-up space-y-5 [animation-delay:0.18s]">
+            <div className="rounded-[32px] border border-cyan-400/15 bg-slate-950/75 p-5 shadow-[0_22px_55px_rgba(3,12,22,0.35)] backdrop-blur">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">Conversa</p>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-100">Centro de resposta</h2>
+                </div>
+                <StatusPill label={activityLabel} tone={activityTone} />
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <div className="rounded-[26px] border border-cyan-400/15 bg-cyan-400/10 p-5">
+                  <p className="text-sm leading-8 text-cyan-50">
+                    Ola, sou o JARVIS. O frontend foi redesenhado para funcionar como landing page e painel operacional no mesmo lugar.
+                  </p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.2em] text-cyan-200/65">Mensagem inicial</p>
+                </div>
+
+                <div className="rounded-[26px] border border-slate-800 bg-slate-900/80 p-5">
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-500">Status atual</p>
+                  <p className="mt-3 text-lg font-semibold text-slate-100">{status}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    {isSupported
+                      ? 'Microfone e gravacao disponiveis neste ambiente.'
+                      : 'Este ambiente nao suporta captura de audio com MediaRecorder.'}
+                  </p>
+                </div>
+
+                <div className="rounded-[26px] border border-slate-800 bg-slate-900/80 p-5">
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-500">Ultima transcricao</p>
+                  <p className="mt-3 min-h-24 text-sm leading-7 text-slate-300">
+                    {transcript || 'Quando voce falar, a frase capturada aparecera aqui.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-cyan-400/15 bg-slate-950/75 p-5 backdrop-blur">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">Pipeline</p>
+              <div className="mt-5 space-y-4">
+                {steps.map((step, index) => (
+                  <div key={step.title} className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-sm font-bold text-cyan-100">
+                      0{index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-100">{step.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-400">{step.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section className="mt-8 items-stretch gap-6 lg:grid lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="animate-fade-up rounded-[34px] border border-cyan-400/15 bg-slate-950/70 p-6 shadow-[0_18px_55px_rgba(2,8,16,0.38)] backdrop-blur [animation-delay:0.26s] sm:p-8">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">Por que esse layout funciona</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-100 sm:text-4xl">Uma landing que ja parece o produto.</h2>
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              {benefits.map((item) => (
+                <div key={item} className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 transition-transform duration-300 hover:-translate-y-1">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                    <p className="text-sm leading-7 text-slate-300">{item}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <h1 className="text-6xl md:text-7xl font-bold text-[#f0ebe4] mb-6 leading-[1.1] font-(family-name:--font-caveat)">
-            Seu PC obedece
-            <br />
-            sua voz
-          </h1>
-
-          <p className="text-xl text-[#a09080] mb-12 max-w-2xl mx-auto leading-relaxed">
-            Jarvis agora roda como aplicativo desktop. O Electron segura a interface, o Flask executa os comandos no Windows e a ElevenLabs continua cuidando da voz de resposta.
-          </p>
-
-          <div className="max-w-lg mx-auto mb-12">
-            <div className="bg-[#2a2520] border border-white/5 rounded-3xl p-10 shadow-2xl">
+          <div className="animate-fade-up flex h-full flex-col justify-between rounded-[34px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(10,34,51,0.92),rgba(5,15,24,0.98))] p-6 shadow-[0_18px_55px_rgba(2,8,16,0.38)] [animation-delay:0.32s] sm:p-8">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-cyan-300/75">CTA</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-50">Pronto para testar no desktop?</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              Ative o assistente, fale um comando curto e acompanhe todo o fluxo direto nessa interface.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
+                type="button"
                 onClick={() => {
                   void toggleListening()
                 }}
                 disabled={!isSupported}
-                className={`w-40 h-40 mx-auto rounded-full flex items-center justify-center transition-all duration-300 ${isListening
-                  ? 'bg-linear-to-br from-red-500 to-red-600 animate-pulse shadow-2xl shadow-red-500/40 scale-105'
-                  : 'bg-linear-to-br from-[#d4724a] to-[#b85a35] hover:scale-110 shadow-2xl shadow-[#d4724a]/40'
-                  } ${!isSupported ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <svg className="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
+                <Icon path="M12 5v14M5 12h14" className="h-4 w-4" />
+                {isListening ? 'Continuar ouvindo' : 'Ligar Jarvis agora'}
               </button>
-
-              <div className="mt-8 text-center">
-                <p className="text-[#a09080] text-sm mb-2">Status</p>
-                <p className="text-[#f0ebe4] font-semibold text-lg">{status}</p>
-              </div>
-
-              {(isThinking || isSpeaking) && (
-                <div className="mt-4 flex justify-center gap-3 text-sm text-[#d4724a]">
-                  {isThinking && <span>Pensando</span>}
-                  {isSpeaking && <span>Respondendo</span>}
-                </div>
-              )}
-
-              {transcript && (
-                <div className="mt-6 p-4 bg-[#d4724a]/10 border border-[#d4724a]/20 rounded-2xl">
-                  <p className="text-[#d4724a] text-sm mb-1 font-medium">Voce disse:</p>
-                  <p className="text-[#f0ebe4]">{transcript}</p>
-                </div>
-              )}
+              <Link
+                href="/comandos"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-cyan-300/20 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/10"
+              >
+                <Icon path="M4 7h16M4 12h16M4 17h16" className="h-4 w-4" />
+                Abrir mapa de comandos
+              </Link>
             </div>
           </div>
-
-          <div className="flex flex-wrap gap-6 justify-center text-[#a09080] text-sm">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#d4724a]" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Sem browser</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#d4724a]" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Transcricao via Groq</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-[#d4724a]" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Automacao local</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-[#2a2520]">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#d4724a] text-center mb-20 font-(family-name:--font-caveat)">Como Funciona</h2>
-
-          <div className="grid md:grid-cols-3 gap-12 relative">
-            <div className="hidden md:block absolute top-12 left-1/4 right-1/4 h-0.5 bg-linear-to-r from-transparent via-[#d4724a]/30 to-transparent"></div>
-
-            {[
-              { num: '1', title: 'Grave sua fala', desc: 'O Electron captura o audio localmente e encerra a frase quando detecta silencio.' },
-              { num: '2', title: 'Jarvis interpreta', desc: 'O Flask envia a transcricao para a Groq, decide a acao e gera a resposta.' },
-              { num: '3', title: 'Seu PC executa', desc: 'PyAutoGUI aplica o comando no Windows e a ElevenLabs devolve a resposta em voz.' },
-            ].map((step, index) => (
-              <div key={index} className="text-center relative">
-                <div className="w-20 h-20 bg-linear-to-br from-[#d4724a] to-[#b85a35] rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-6 shadow-lg shadow-[#d4724a]/30 relative z-10">
-                  {step.num}
-                </div>
-                <h3 className="text-xl font-bold text-[#f0ebe4] mb-3">{step.title}</h3>
-                <p className="text-[#a09080] leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#d4724a] text-center mb-20 font-(family-name:--font-caveat)">Por Que Jarvis</h2>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { title: 'Fluxo desktop real', desc: 'A interface agora sobe em Electron, sem depender de abrir um navegador para operar o assistente.' },
-              { title: 'Captura desacoplada do browser', desc: 'A fala vira arquivo de audio local e segue para o Flask, removendo a dependencia de webkitSpeechRecognition.' },
-              { title: 'Feedback por voz', desc: 'A ElevenLabs continua gerando audio natural para confirmar cada acao executada no computador.' },
-              { title: 'Arquitetura simples', desc: 'Next.js cuida da UI, Electron empacota a janela desktop e Flask fica responsavel pela automacao e IA.' },
-            ].map((feature, index) => (
-              <div key={index} className="bg-[#2a2520] border border-white/5 rounded-2xl p-8 hover:border-[#d4724a]/30 transition-all">
-                <h3 className="text-xl font-bold text-[#f0ebe4] mb-3">{feature.title}</h3>
-                <p className="text-[#a09080] leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-[#2a2520]">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#d4724a] text-center mb-20">Comandos Disponiveis</h2>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {[
-              { cmd: 'abra o whatsapp', icon: '💬' },
-              { cmd: 'nova aba', icon: '🌐' },
-              { cmd: 'copiar', icon: '📋' },
-              { cmd: 'colar', icon: '📌' },
-              { cmd: 'salvar', icon: '💾' },
-              { cmd: 'minimizar', icon: '🔽' },
-              { cmd: 'escreva [texto]', icon: '✍️' },
-              { cmd: 'pressione [tecla]', icon: '⌨️' },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center gap-4 bg-[#1a1614] border border-white/5 rounded-xl p-4 hover:border-[#d4724a]/30 transition-all">
-                <span className="text-3xl">{item.icon}</span>
-                <span className="text-[#f0ebe4] font-medium">{item.cmd}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <a href="/comandos" className="text-[#d4724a] hover:text-[#c26640] font-semibold inline-flex items-center gap-2">
-              Ver todos os comandos
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-linear-to-br from-[#2a2520] to-[#1a1614] border-2 border-[#d4724a]/30 rounded-3xl p-12 text-center shadow-2xl shadow-[#d4724a]/20">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#f0ebe4] mb-4">Pronto para comecar?</h2>
-            <p className="text-[#a09080] text-lg mb-8 max-w-2xl mx-auto">
-              Inicie o modo de escuta e fale naturalmente. O Jarvis vai gravar a frase, transcrever, decidir a acao e responder sem sair do app desktop.
-            </p>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="bg-[#d4724a] hover:bg-[#c26640] text-white px-10 py-4 rounded-full font-bold text-lg transition-all hover:shadow-xl hover:shadow-[#d4724a]/40 hover:-translate-y-1"
-            >
-              Ativar Jarvis
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <footer className="py-12 px-6 border-t border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-linear-to-br from-[#d4724a] to-[#b85a35] rounded-lg"></div>
-            <span className="text-[#f0ebe4] font-bold">Jarvis</span>
-          </div>
-          <p className="text-[#a09080] text-sm">© 2026 Jarvis. Assistente desktop por voz para Windows.</p>
-        </div>
-      </footer>
+        </section>
+      </div>
     </div>
   )
 }
