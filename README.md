@@ -4,6 +4,10 @@ Assistente de voz desktop para Windows com `Electron`, `Next.js` e `Flask`.
 
 Jarvis captura sua fala no app desktop, transcreve o audio com Groq Whisper, interpreta o comando com Groq LLaMA, executa a automacao local com `pyautogui` e responde com audio pela ElevenLabs.
 
+## Preview
+
+![Preview da interface do Jarvis](./assets/preview.jpg)
+
 ## Stack
 
 - `Electron` para janela desktop

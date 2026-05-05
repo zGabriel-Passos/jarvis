@@ -1,36 +1,36 @@
-import type { Metadata } from "next";
-import { DM_Sans, Caveat } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { IBM_Plex_Sans, Space_Mono } from 'next/font/google'
+import './globals.css'
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-dm-sans',
-});
+  variable: '--font-ibm-plex-sans',
+})
 
-const caveat = Caveat({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
   display: 'swap',
-  variable: '--font-caveat',
-});
+  variable: '--font-space-mono',
+})
 
 export const metadata: Metadata = {
-  title: "Jarvis - Assistente de Voz",
-  description: "Controle seu PC com sua voz. Assistente inteligente que executa comandos do sistema.",
-};
+  title: 'Jarvis - Assistente de Voz',
+  description: 'Controle seu PC com sua voz. Assistente inteligente que executa comandos do sistema.',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${dmSans.variable} ${caveat.variable} ${dmSans.className}`}>
+      <body className={`${ibmPlexSans.variable} ${spaceMono.variable} ${ibmPlexSans.className}`}>
         {children}
       </body>
     </html>
-  );
+  )
 }
